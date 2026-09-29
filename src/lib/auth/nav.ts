@@ -1,0 +1,92 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  Bell,
+  BookOpen,
+  Calendar,
+  ClipboardCheck,
+  CreditCard,
+  FileText,
+  GraduationCap,
+  LayoutDashboard,
+  MessageSquare,
+  School,
+  Settings,
+  Users,
+  Video,
+  BarChart3,
+  FolderOpen,
+  PenSquare,
+  UserRound,
+  Building2,
+  ScrollText,
+  BadgeCheck,
+} from "lucide-react";
+import type { UserRole } from "@/lib/auth/roles";
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+export const ROLE_NAV: Record<UserRole, NavItem[]> = {
+  student: [
+    { href: "/student", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/student/courses", label: "My Courses", icon: BookOpen },
+    { href: "/student/live", label: "Live Classes", icon: Video },
+    { href: "/student/assignments", label: "Assignments & Quizzes", icon: ClipboardCheck },
+    { href: "/student/progress", label: "Progress & Grades", icon: BarChart3 },
+    { href: "/student/resources", label: "Study Resources", icon: FolderOpen },
+    { href: "/student/messages", label: "Messages", icon: MessageSquare },
+    { href: "/student/calendar", label: "Calendar", icon: Calendar },
+    { href: "/student/notifications", label: "Notifications", icon: Bell },
+    { href: "/student/profile", label: "Profile", icon: UserRound },
+    { href: "/student/settings", label: "Settings", icon: Settings },
+  ],
+  parent: [
+    { href: "/parent", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/parent/children", label: "My Children", icon: Users },
+    { href: "/parent/progress", label: "Progress", icon: BarChart3 },
+    { href: "/parent/attendance", label: "Attendance", icon: BadgeCheck },
+    { href: "/parent/schedule", label: "Schedule", icon: Calendar },
+    { href: "/parent/assignments", label: "Assignments", icon: ClipboardCheck },
+    { href: "/parent/announcements", label: "Announcements", icon: Bell },
+    { href: "/parent/messages", label: "Messages", icon: MessageSquare },
+    { href: "/parent/payments", label: "Payments & Fees", icon: CreditCard },
+    { href: "/parent/notifications", label: "Notifications", icon: Bell },
+    { href: "/parent/profile", label: "Profile", icon: UserRound },
+    { href: "/parent/settings", label: "Settings", icon: Settings },
+  ],
+  teacher: [
+    { href: "/teacher", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/teacher/classes", label: "My Classes", icon: School },
+    { href: "/teacher/students", label: "Students", icon: Users },
+    { href: "/teacher/courses", label: "Courses", icon: BookOpen },
+    { href: "/teacher/lessons", label: "Lessons", icon: FileText },
+    { href: "/teacher/assignments", label: "Assignments", icon: ClipboardCheck },
+    { href: "/teacher/quizzes", label: "Quizzes", icon: PenSquare },
+    { href: "/teacher/grading", label: "Grading", icon: GraduationCap },
+    { href: "/teacher/attendance", label: "Attendance", icon: BadgeCheck },
+    { href: "/teacher/calendar", label: "Calendar", icon: Calendar },
+    { href: "/teacher/announcements", label: "Announcements", icon: Bell },
+    { href: "/teacher/messages", label: "Messages", icon: MessageSquare },
+    { href: "/teacher/reports", label: "Reports", icon: BarChart3 },
+    { href: "/teacher/profile", label: "Profile", icon: UserRound },
+    { href: "/teacher/settings", label: "Settings", icon: Settings },
+  ],
+  admin: [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/students", label: "Students", icon: GraduationCap },
+    { href: "/admin/parents", label: "Parents", icon: Users },
+    { href: "/admin/teachers", label: "Teachers", icon: School },
+    { href: "/admin/schools", label: "Schools", icon: Building2 },
+    { href: "/admin/classes", label: "Classes", icon: BookOpen },
+    { href: "/admin/courses", label: "Courses", icon: FolderOpen },
+    { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+    { href: "/admin/announcements", label: "Announcements", icon: Bell },
+    { href: "/admin/payments", label: "Payments", icon: CreditCard },
+    { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin/audit", label: "Audit Logs", icon: ScrollText },
+  ],
+};
