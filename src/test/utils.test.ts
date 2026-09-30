@@ -11,21 +11,28 @@ describe("Pure Utility Functions", () => {
   });
 
   describe("formatDate", () => {
-    it("formats valid ISO date strings", () => {
+    it("formats valid ISO date strings in Asia/Manila timezone", () => {
       const formatted = formatDate("2026-09-29T10:00:00Z");
       expect(formatted).toMatch(/Sep 29, 2026/);
     });
 
-    it("formats Date objects", () => {
+    it("formats Date objects in Asia/Manila timezone", () => {
       const date = new Date(2026, 0, 15);
       const formatted = formatDate(date);
       expect(formatted).toMatch(/Jan 15, 2026/);
     });
 
-    it("includes time when withTime is true", () => {
+    it("includes time when withTime is true in Asia/Manila timezone", () => {
       const formatted = formatDate("2026-09-29T14:30:00Z", true);
       expect(formatted).toMatch(/Sep 29, 2026/);
       expect(formatted).toMatch(/:/); // contains hour:minute
+    });
+
+    it("correctly converts UTC to Asia/Manila (UTC+8)", () => {
+      // 00:00 UTC = 08:00 PHT
+      const formatted = formatDate("2026-09-29T00:00:00Z", true);
+      expect(formatted).toMatch(/Sep 29, 2026/);
+      expect(formatted).toMatch(/8/); // should show 8 AM PHT
     });
 
     it("returns em dash for null, undefined, or invalid input", () => {

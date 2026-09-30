@@ -13,7 +13,8 @@ export function formatDate(value: string | Date | null | undefined, withTime = f
     month: "short",
     day: "numeric",
     year: "numeric",
-    ...(withTime ? { hour: "numeric", minute: "2-digit" } : {}),
+    timeZone: "Asia/Manila",
+    ...(withTime ? { hour: "numeric", minute: "2-digit", timeZone: "Asia/Manila" } : {}),
   }).format(date);
 }
 
