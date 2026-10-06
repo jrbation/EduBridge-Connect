@@ -5,6 +5,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   profileSchema,
+  createAdminSchema,
 } from "@/lib/validations/auth";
 
 describe("Authentication Validation Schemas", () => {
@@ -137,6 +138,62 @@ describe("Authentication Validation Schemas", () => {
 
     it("rejects names shorter than 2 chars", () => {
       expect(profileSchema.safeParse({ fullName: "A" }).success).toBe(false);
+    });
+  });
+
+  describe("createAdminSchema", () => {
+    it("accepts valid admin creation data", () => {
+      const result = createAdminSchema.safeParse({
+        fullName: "Admin User",
+        email: "admin@edubridge.test",
+        password: "SecurePassword123!",
+        confirmPassword: "SecurePassword123!",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects invalid email", () => {
+      const result = createAdminSchema.safeParse({
+        fullName: "Admin User",
+        email: "not-an-email",
+        password: "SecurePassword123!",
+        confirmPassword: "SecurePassword123!",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects password shorter than 8 characters", () => {
+      const result = createAdminSchema.safeParse({
+        fullName: "Admin User",
+        email: "admin@edubridge.test",
+        password: "short",
+        confirmPassword: "short",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects when passwords do not match", () => {
+      const result = createAdminSchema.safeParse({
+        fullName: "Admin User",
+        email: "admin@edubridge.test",
+        password: "Password123!",
+        confirmPassword: "DifferentPassword123!",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const mismatchError = result.error.issues.find((i) => i.path.includes("confirmPassword"));
+        expect(mismatchError?.message).toBe("Passwords do not match");
+      }
+    });
+
+    it("rejects name shorter than 2 characters", () => {
+      const result = createAdminSchema.safeParse({
+        fullName: "A",
+        email: "admin@edubridge.test",
+        password: "SecurePassword123!",
+        confirmPassword: "SecurePassword123!",
+      });
+      expect(result.success).toBe(false);
     });
   });
 });

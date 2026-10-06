@@ -38,5 +38,18 @@ export const profileSchema = z.object({
   phone: z.string().max(30).optional().or(z.literal("")),
 });
 
+export const createAdminSchema = z
+  .object({
+    fullName: z.string().min(2, "Name is required").max(80),
+    email: z.string().email("Enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
+export type CreateAdminInput = z.infer<typeof createAdminSchema>;

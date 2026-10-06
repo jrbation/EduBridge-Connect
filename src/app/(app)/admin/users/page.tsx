@@ -5,6 +5,7 @@ import { PageHeader, EmptyState } from "@/components/shared/states";
 import { Badge } from "@/components/ui/badge";
 import { PendingButton, ActionForm } from "@/components/forms/pending-button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CreateAdminDialog } from "./create-admin-dialog";
 
 export default async function AdminUsersPage() {
   await requireRole("admin");
@@ -13,7 +14,11 @@ export default async function AdminUsersPage() {
 
   return (
     <div>
-      <PageHeader title="Users" description="Activate or deactivate accounts." />
+      <PageHeader
+        title="Users"
+        description="Activate or deactivate accounts."
+        actions={<CreateAdminDialog />}
+      />
       {!data?.length ? (
         <EmptyState title="No users yet." />
       ) : (

@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireProfile, requireRole } from "@/lib/auth/session";
 import { linkChildSchema, messageSchema, paymentSchema } from "@/lib/validations/academic";
-import { profileSchema } from "@/lib/validations/auth";
+import { profileSchema, createAdminSchema } from "@/lib/validations/auth";
 import { notify } from "@/lib/data/records";
 
 function str(formData: FormData, key: string) {
@@ -162,4 +163,66 @@ export async function savePlatformSettingAction(formData: FormData) {
   if (error) return { error: error.message };
   revalidatePath("/admin/settings");
   return { success: "Settings saved" };
+}
+
+export async function createAdminAction(formData: FormData) {
+  const admin = await requireRole("admin");
+  const parsed = createAdminSchema.safeParse({
+    fullName: str(formData, "fullName"),
+    email: str(formData, "email"),
+    password: str(formData, "password"),
+    confirmPassword: str(formData, "confirmPassword"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+  const adminClient = createAdminClient();
+
+  const { data: existingUsers } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+  if (existingUsers.users.some((user) => user.email === parsed.data.email)) {
+    return { error: "An account with this email already exists" };
+  }
+
+  const { data: userData, error: authError } = await adminClient.auth.admin.createUser({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    email_confirm: true,
+    user_metadata: { full_name: parsed.data.fullName, role: "student" },
+  });
+
+  if (authError || !userData.user) {
+    return { error: authError?.message ?? "Failed to create admin account" };
+  }
+
+  const userId = userData.user.id;
+
+  try {
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .update({ role: "admin", full_name: parsed.data.fullName, status: "active" })
+      .eq("id", userId);
+
+    if (profileError) {
+      throw new Error(`Profile update failed: ${profileError.message}`);
+    }
+
+    const { error: deleteStudentError } = await adminClient.from("students").delete().eq("profile_id", userId);
+    if (deleteStudentError) {
+      console.warn("Failed to delete student record for admin:", deleteStudentError.message);
+    }
+
+    await adminClient.from("audit_logs").insert({
+      actor_id: admin.id,
+      action: "admin_created",
+      entity: "profiles",
+      entity_id: userId,
+      metadata: { email: parsed.data.email, full_name: parsed.data.fullName },
+    });
+
+    revalidatePath("/admin/users");
+    return { success: "Admin account created successfully" };
+  } catch (error) {
+    console.error("Admin creation failed, rolling back:", error);
+    await adminClient.auth.admin.deleteUser(userId);
+    return { error: "Failed to create admin account. Changes have been rolled back." };
+  }
 }
