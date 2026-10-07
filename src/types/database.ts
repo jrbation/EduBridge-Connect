@@ -1,6 +1,6 @@
 export type UserRole = "student" | "parent" | "teacher" | "admin";
 export type AccountStatus = "active" | "inactive";
-export type RelationshipStatus = "pending" | "approved" | "revoked";
+export type RelationshipStatus = "pending" | "approved" | "revoked" | "rejected";
 export type PublishStatus = "draft" | "published" | "archived";
 export type SubmissionStatus = "draft" | "submitted" | "graded" | "returned";
 export type AttendanceStatus = "present" | "late" | "absent" | "excused";

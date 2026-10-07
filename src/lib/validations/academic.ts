@@ -78,6 +78,10 @@ export const linkChildSchema = z.object({
   relationship: z.string().min(2).default("guardian"),
 });
 
+export const relationshipIdSchema = z.object({
+  relationshipId: z.string().uuid("Invalid relationship ID"),
+});
+
 export const schoolSchema = z.object({
   name: z.string().min(2),
   address: z.string().optional(),

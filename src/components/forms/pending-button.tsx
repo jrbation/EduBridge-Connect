@@ -3,11 +3,12 @@
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ButtonProps } from "@/components/ui/button";
 
-export function PendingButton({ children }: { children: React.ReactNode }) {
+export function PendingButton({ children, variant, size, ...props }: ButtonProps & { children: React.ReactNode }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending} variant={variant} size={size} {...props}>
       {pending ? "Saving..." : children}
     </Button>
   );

@@ -43,9 +43,13 @@ export default async function ParentChildrenPage() {
                       </p>
                       <p className="text-sm text-muted-foreground">{person?.email}</p>
                     </div>
-                    <Badge variant={link.status === "approved" ? "success" : "warning"}>{link.status}</Badge>
+                    <Badge variant={link.status === "approved" ? "success" : link.status === "pending" ? "warning" : "destructive"}>{link.status}</Badge>
                   </div>
-                  <p className="mt-2 text-xs text-muted-foreground">Relationship: {link.relationship}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Relationship: {link.relationship}
+                    {link.status === "pending" && " · Waiting for student approval"}
+                    {link.status === "rejected" && " · Request was rejected"}
+                  </p>
                 </article>
               );
             })

@@ -56,3 +56,16 @@ export async function getParentChildren(profileId: string) {
     .order("created_at", { ascending: false });
   return data ?? [];
 }
+
+export async function getPendingParentRequests(studentId: string) {
+  const student = await getStudentRecord(studentId);
+  if (!student) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("parent_student_relationships")
+    .select("id, parent_id, relationship, status, parents(profiles(full_name, email))")
+    .eq("student_id", student.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  return data ?? [];
+}

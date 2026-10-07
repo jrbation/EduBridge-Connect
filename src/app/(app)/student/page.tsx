@@ -2,11 +2,12 @@ import Link from "next/link";
 import { BookOpen, Calendar, ClipboardCheck, Megaphone } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { getStudentRecord, firstName } from "@/lib/data/records";
+import { getStudentRecord, firstName, getPendingParentRequests } from "@/lib/data/records";
 import { PageHeader, StatCard, EmptyState } from "@/components/shared/states";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/misc";
 import { formatDate, percent } from "@/lib/utils";
+import { PendingParentRequests } from "@/components/student/pending-parent-requests";
 
 export default async function StudentDashboardPage() {
   const profile = await requireRole("student");
@@ -16,7 +17,7 @@ export default async function StudentDashboardPage() {
     return <EmptyState title="Student profile is incomplete" description="Ask an administrator to finish setup." />;
   }
 
-  const [{ data: enrollments }, { data: assignments }, { data: grades }, { data: attendance }, { data: schedules }, { data: announcements }] =
+  const [{ data: enrollments }, { data: assignments }, { data: grades }, { data: attendance }, { data: schedules }, { data: announcements }, pendingRequests] =
     await Promise.all([
       supabase.from("class_students").select("class_id, classes(id, name, subject)").eq("student_id", student.id),
       supabase.from("assignments").select("id, title, due_date, class_id").order("due_date", { ascending: true }).limit(8),
@@ -24,6 +25,7 @@ export default async function StudentDashboardPage() {
       supabase.from("attendance").select("status").eq("student_id", student.id),
       supabase.from("schedules").select("id, title, start_time, type").gte("start_time", new Date().toISOString()).order("start_time").limit(5),
       supabase.from("announcements").select("id, title, created_at").order("created_at", { ascending: false }).limit(4),
+      getPendingParentRequests(profile.id),
     ]);
 
   const present = attendance?.filter((row) => row.status === "present" || row.status === "late").length ?? 0;
@@ -51,6 +53,7 @@ export default async function StudentDashboardPage() {
       <p className="mt-4 rounded-xl border bg-card px-4 py-3 text-sm">
         Parent connection code: <span className="font-semibold">{student.connection_code}</span>
       </p>
+      <PendingParentRequests requests={pendingRequests} />
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border bg-card p-5 shadow-card">
           <div className="mb-3 flex items-center justify-between">

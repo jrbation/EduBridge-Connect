@@ -67,20 +67,129 @@ export async function updateProfileAction(formData: FormData) {
 }
 
 export async function linkChildAction(formData: FormData) {
-  await requireRole("parent");
+  const profile = await requireRole("parent");
   const parsed = linkChildSchema.safeParse({
     code: str(formData, "code"),
     relationship: str(formData, "relationship") || "guardian",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid code" };
   const supabase = await createClient();
-  const { error } = await supabase.rpc("link_child_with_code", {
+  
+  // Look up student to get their profile_id for notification
+  const { data: student } = await supabase
+    .from("students")
+    .select("id, profile_id")
+    .eq("connection_code", parsed.data.code.toUpperCase())
+    .maybeSingle();
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.rpc("link_child_with_code" as any, {
     p_code: parsed.data.code,
     p_relationship: parsed.data.relationship,
   });
   if (error) return { error: error.message };
+  
+  // Notify student about the request
+  if (student?.profile_id) {
+    await notify(student.profile_id, "New parent connection request", `${profile.full_name} has requested to connect with your account.`, "parent");
+  }
+  
+  // Log audit
+  if (student) {
+    await supabase.from("audit_logs").insert({
+      actor_id: profile.id,
+      action: "parent_connection_requested",
+      entity: "parent_student_relationships",
+      metadata: { student_id: student.id, relationship: parsed.data.relationship },
+    });
+  }
+  
   revalidatePath("/parent/children");
-  return { success: "Child linked" };
+  return { success: "Connection request sent. The student will need to approve it." };
+}
+
+export async function approveParentLinkAction(formData: FormData) {
+  const profile = await requireRole("student");
+  const relationshipId = str(formData, "relationshipId");
+  const supabase = await createClient();
+  
+  // Verify the relationship belongs to this student
+  const { data: relationship } = await supabase
+    .from("parent_student_relationships")
+    .select("id, status, parent_id, student_id, parents(profiles(full_name))")
+    .eq("id", relationshipId)
+    .eq("student_id", profile.id)
+    .single();
+  
+  if (!relationship) return { error: "Relationship not found" };
+  if (relationship.status !== "pending") return { error: "This relationship is not pending approval" };
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.rpc("approve_parent_link" as any, {
+    p_relationship_id: relationshipId,
+  });
+  if (error) return { error: error.message };
+  
+  // Notify parent
+  const parentProfile = relationship.parents as { profiles: { full_name: string } | { full_name: string }[] } | null;
+  const parentName = Array.isArray(parentProfile?.profiles) ? parentProfile.profiles[0]?.full_name : parentProfile?.profiles?.full_name;
+  if (relationship.parent_id) {
+    await notify(relationship.parent_id, "Parent connection approved", `${parentName ?? "A parent"} has approved your connection request.`, "parent");
+  }
+  
+  // Log audit
+  await supabase.from("audit_logs").insert({
+    actor_id: profile.id,
+    action: "parent_connection_approved",
+    entity: "parent_student_relationships",
+    entity_id: relationshipId,
+    metadata: { parent_id: relationship.parent_id, student_id: relationship.student_id },
+  });
+  
+  revalidatePath("/student");
+  return { success: "Parent connection approved" };
+}
+
+export async function rejectParentLinkAction(formData: FormData) {
+  const profile = await requireRole("student");
+  const relationshipId = str(formData, "relationshipId");
+  const supabase = await createClient();
+  
+  // Verify the relationship belongs to this student
+  const { data: relationship } = await supabase
+    .from("parent_student_relationships")
+    .select("id, status, parent_id, student_id, parents(profiles(full_name))")
+    .eq("id", relationshipId)
+    .eq("student_id", profile.id)
+    .single();
+  
+  if (!relationship) return { error: "Relationship not found" };
+  if (relationship.status !== "pending") return { error: "This relationship is not pending approval" };
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.rpc("reject_parent_link" as any, {
+    p_relationship_id: relationshipId,
+  });
+  if (error) return { error: error.message };
+  
+  // Notify parent
+  const parentProfile = relationship.parents as { profiles: { full_name: string } | { full_name: string }[] } | null;
+  const parentName = Array.isArray(parentProfile?.profiles) ? parentProfile.profiles[0]?.full_name : parentProfile?.profiles?.full_name;
+  if (relationship.parent_id) {
+    await notify(relationship.parent_id, "Parent connection rejected", `${parentName ?? "A parent"} rejected your connection request.`, "parent");
+  }
+  
+  // Log audit
+  await supabase.from("audit_logs").insert({
+    actor_id: profile.id,
+    action: "parent_connection_rejected",
+    entity: "parent_student_relationships",
+    entity_id: relationshipId,
+    metadata: { parent_id: relationship.parent_id, student_id: relationship.student_id },
+  });
+  
+  revalidatePath("/student");
+  return { success: "Parent connection request rejected" };
 }
 
 export async function adminCreateAnnouncementAction(formData: FormData) {
