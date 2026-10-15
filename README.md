@@ -1,204 +1,507 @@
 # EduBridge Connect
 
-EduBridge Connect is a modern, unified educational management and collaboration platform designed to bridge communication, learning, and administrative workflows between students, teachers, parents/guardians, and school administrators. Built with Next.js App Router, TypeScript, Tailwind CSS, and Supabase, EduBridge Connect provides role-based access control, real-time updates, and data security powered by PostgreSQL Row Level Security (RLS).
+A unified educational management platform that connects students, teachers, parents, and school administrators. Built with Next.js, TypeScript, Tailwind CSS, and Supabase, EduBridge Connect provides role-based access control, real-time collaboration tools, and secure data management through PostgreSQL Row Level Security.
 
----
+## Table of Contents
 
-## Features
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [System Architecture](#system-architecture)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
+- [Project Structure](#project-structure)
+- [Available Commands](#available-commands)
+- [Authentication & Security](#authentication--security)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-### 🎓 Students
-- **Course & Lesson Access:** View enrolled courses, learning modules, lessons, and downloadable curriculum resources.
-- **Assignments & Quizzes:** Track upcoming assignments, submit work, view grades, and complete interactive quizzes with instant scoring.
-- **Progress Tracking:** Monitor academic performance, course completion rates, and historical grade trends.
-- **Communication & Calendar:** Direct messaging with teachers, view school schedules and live class sessions, and receive real-time notifications.
+## Overview
 
-### 👩‍🏫 Teachers
-- **Classroom Management:** Manage classes, student rosters, and attendance records (present, absent, late, excused).
-- **Curriculum & Content:** Create and organize courses, publish lessons, upload resources, and author quizzes.
-- **Grading & Submissions:** Review submitted student assignments, assign scores, record feedback, and track submission statuses.
-- **Communication & Announcements:** Broadcast class-wide or school-wide announcements, schedule live sessions, and message students and parents.
+EduBridge Connect is designed to streamline educational workflows by providing:
 
-### 👨‍👩‍👧 Parents & Guardians
-- **Child Progress Monitoring:** View academic progress, grades, assignments, and attendance logs for linked children.
-- **Schedule & Calendar:** Keep track of class timetables, upcoming exams, assignment deadlines, and school events.
-- **Tuition & Payments:** View payment invoices, fee structures, and billing transaction history.
-- **Direct Engagement:** Communicate directly with teachers and receive school announcements and alert notifications.
+- **Role-based portals** for students, teachers, parents, and administrators
+- **Academic management** including courses, lessons, assignments, and quizzes
+- **Communication tools** with messaging, announcements, and notifications
+- **Administrative controls** for user management, attendance, payments, and auditing
+- **Parent-student connections** with an approval workflow for data access
 
-### 🛡️ Administrators
-- **User & Role Management:** Manage directory records for students, teachers, parents, and administrative staff with role-based permissions.
-- **School & Class Administration:** Configure academic terms, departments, classrooms, course catalogs, and class allocations.
-- **Financial Overview:** Track tuition payments, transaction statuses, and billing summaries across the institution.
-- **Audit Logs & Platform Settings:** Review system security audit trails and configure institution-wide platform settings.
+The platform uses Supabase for authentication, database, and real-time features, with Next.js App Router for server-side rendering and React Server Actions for form handling.
 
----
+## Key Features
+
+### Student Portal
+- View enrolled courses and learning materials
+- Submit assignments and complete quizzes
+- Track academic progress and grades
+- Access schedules and live class sessions
+- Message teachers and receive notifications
+
+### Teacher Portal
+- Manage classes and student rosters
+- Create courses, lessons, and resources
+- Grade assignments and provide feedback
+- Record attendance (present, absent, late, excused)
+- Author quizzes with multiple question types
+- Broadcast announcements to students
+
+### Parent Portal
+- Link to student accounts via connection codes (with approval workflow)
+- Monitor children's grades, assignments, and attendance
+- View payment invoices and transaction history
+- Communicate with teachers
+- Access school schedules and announcements
+
+### Administrator Portal
+- Manage users across all roles (students, teachers, parents, admins)
+- Configure schools, classes, and course catalogs
+- Review audit logs and platform settings
+- Monitor payment transactions
+- View institution-wide reports
 
 ## Technology Stack
 
-- **Framework:** [Next.js](https://nextjs.org/) (v15 App Router with Turbopack)
-- **Language:** [TypeScript](https://www.typescriptlang.org/) (Strict type-checking)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with `tailwindcss-animate`
-- **UI Components:** [Radix UI](https://www.radix-ui.com/) primitives (Dialog, Dropdown Menu, Popover, Select, Tabs, Tooltip, Avatar, Progress, Switch, Scroll Area)
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **Data Visualization:** [Recharts](https://recharts.org/)
-- **Form Handling & Validation:** [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/) & `@hookform/resolvers`
-- **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Supabase Auth, Row Level Security)
-- **Client & Server Integration:** `@supabase/supabase-js`, `@supabase/ssr`
-- **Testing:** [Vitest](https://vitest.dev/) with `@testing-library/react` and `jsdom`
-- **Notifications & Feedback:** [Sonner](https://sonner.emilkowal.ski/) toast notifications
-- **Theme Support:** `next-themes` (Dark / Light mode support)
+### Frontend
+- **Next.js 15** - React framework with App Router and Turbopack
+- **React 19** - UI library
+- **TypeScript** - Type-safe development with strict mode
+- **Tailwind CSS** - Utility-first styling with custom design system
+- **Radix UI** - Accessible component primitives (Dialog, Dropdown, Tabs, Avatar, etc.)
+- **Lucide React** - Icon library
+- **Recharts** - Data visualization and charts
+- **next-themes** - Dark/light mode support
 
----
+### Backend & Database
+- **Supabase** - Backend-as-a-Service providing:
+  - PostgreSQL database with Row Level Security (RLS)
+  - Authentication (email/password, password reset)
+  - Real-time subscriptions
+- **Next.js Server Actions** - Server-side form handling
+- **@supabase/ssr** - Server-side Supabase client integration
 
-## Project Structure
+### Form Handling & Validation
+- **React Hook Form** - Form state management
+- **Zod** - Schema validation
+- **@hookform/resolvers** - Zod integration with React Hook Form
 
-```text
-EduBridge Connect/
-├── .cursor/                # Editor workspace configuration
-├── .env.example            # Template for environment variables (safe to commit)
-├── .gitignore              # Git ignore rules for Next.js, Supabase, and build artifacts
-├── eslint.config.mjs       # ESLint configuration
-├── next.config.ts          # Next.js configuration
-├── package.json            # Project dependencies and npm scripts
-├── postcss.config.mjs      # PostCSS configuration
-├── scripts/                # Database seeding and utility scripts
-│   ├── seed.ts             # Demo account provisioning script
-│   └── test_rls.js         # Row Level Security verification test script
-├── src/
-│   ├── actions/            # Next.js Server Actions (e.g., auth, password resets)
-│   ├── app/                # Next.js App Router routes
-│   │   ├── (app)/          # Protected portal routes grouped by role
-│   │   │   ├── admin/      # Administrator portal routes
-│   │   │   ├── parent/     # Parent / Guardian portal routes
-│   │   │   ├── student/    # Student portal routes
-│   │   │   └── teacher/    # Teacher portal routes
-│   │   ├── auth/           # Auth callbacks and handlers
-│   │   ├── login/          # User login page
-│   │   ├── signup/         # Account registration page
-│   │   ├── forgot-password/# Password recovery request
-│   │   └── reset-password/ # Password reset handler
-│   ├── components/         # Reusable React components
-│   │   ├── charts/         # Dashboard analytics charts (Recharts)
-│   │   ├── forms/          # Form components and input fields
-│   │   ├── layout/         # Navigation, header, sidebar, and app shells
-│   │   ├── pages/          # Modular view components
-│   │   ├── shared/         # Shared UI cards, filters, and tables
-│   │   └── ui/             # Radix-based UI components
-│   ├── lib/                # Utility functions, validation schemas, and database clients
-│   │   ├── auth/           # Navigation config, role helpers, and session validation
-│   │   ├── data/           # Query abstractions and data mappers
-│   │   ├── supabase/       # Supabase browser, server, admin, and middleware clients
-│   │   ├── utils.ts        # Common helper utilities (cn, formatting)
-│   │   └── validations/    # Zod schema definitions
-│   ├── middleware.ts       # Route protection and role-based redirect middleware
-│   ├── test/               # Vitest unit and validation test suites
-│   └── types/              # TypeScript database types and application interfaces
-├── supabase/
-│   ├── full_schema.sql     # Full database schema reference
-│   └── migrations/         # Supabase SQL migration files
-│       ├── 20240928000001_init.sql
-│       └── 20240928000002_qa_fixes.sql
-├── tailwind.config.ts      # Tailwind CSS design system configuration
-├── tsconfig.json           # TypeScript configuration
-└── vitest.config.ts        # Vitest test configuration
+### Testing
+- **Vitest** - Unit and integration testing
+- **@testing-library/react** - React component testing
+- **jsdom** - DOM environment for tests
+
+### Development Tools
+- **ESLint** - Code linting with Next.js config
+- **PostCSS** - CSS processing
+- **tsx** - TypeScript execution for scripts
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         User Browser                             │
+│                    (Next.js Client Components)                   │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         │ HTTP/HTTPS
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Next.js Server                              │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  App Router                                                │  │
+│  │  ├── Role-based routes (/student, /teacher, /parent, /admin)│  │
+│  │  ├── Server Actions (auth, academic, account)            │  │
+│  │  └── Middleware (route protection, session validation)    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         │ Supabase Client (Browser/Server/Admin)
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       Supabase Platform                          │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  PostgreSQL Database                                     │  │
+│  │  ├── 29 tables (schools, profiles, students, etc.)      │  │
+│  │  ├── Row Level Security (RLS) policies                  │  │
+│  │  └── Triggers & constraints                              │  │
+│  ├──────────────────────────────────────────────────────────┤  │
+│  │  Authentication                                           │  │
+│  │  ├── Email/password authentication                       │  │
+│  │  ├── Password reset flows                                 │  │
+│  │  └── JWT-based session management                         │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
----
+### Data Flow
 
-## Getting Started
+1. **Authentication**: Users sign in via Supabase Auth; middleware validates sessions and roles
+2. **Route Protection**: Next.js middleware enforces role-based access to portal routes
+3. **Data Access**: Server Actions and server components use Supabase client with RLS policies
+4. **Real-time Updates**: Supabase subscriptions enable live notifications and messaging
+5. **Form Validation**: Zod schemas validate inputs before database operations
 
-Follow these steps to set up and run EduBridge Connect locally:
+## Prerequisites
 
-### 1. Prerequisites
-- [Node.js](https://nodejs.org/) (v20+ recommended)
-- [npm](https://www.npmjs.com/) or another compatible package manager
-- A [Supabase](https://supabase.com/) project (hosted or local instance)
+- **Node.js** v20 or higher
+- **npm** (or compatible package manager)
+- **Supabase project** (hosted at supabase.com or local instance)
+- **Git** (for cloning the repository)
 
-### 2. Clone the Repository
+## Installation
+
+### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/jrbation/EduBridge-Connect.git
 cd EduBridge-Connect
 ```
 
-### 3. Install Dependencies
+### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
-### 4. Configure Environment Variables
-Copy `.env.example` to `.env.local`:
+### 3. Configure Environment Variables
+
+Copy the example environment file:
+
 ```bash
 cp .env.example .env.local
 ```
-Fill in your Supabase project credentials in `.env.local` (see [Environment Variables](#environment-variables)).
 
-### 5. Configure Database & Seed Data
-1. Apply the SQL migrations located in `supabase/migrations/` to your Supabase PostgreSQL database via the Supabase Dashboard SQL Editor or Supabase CLI.
-2. (Optional) Seed demo user accounts using the seed script:
+Edit `.env.local` and fill in your Supabase credentials (see [Environment Variables](#environment-variables)).
+
+### 4. Set Up the Database
+
+Apply the SQL migrations to your Supabase project:
+
+1. Open your Supabase Dashboard
+2. Navigate to the SQL Editor
+3. Run each migration file in order from `supabase/migrations/`:
+   - `20240928000001_init.sql` - Core schema, tables, and RLS policies
+   - `20240928000002_qa_fixes.sql` - Security patches and optimizations
+   - `20250106000001_parent_approval.sql` - Parent-student approval workflow
+
+Alternatively, use the Supabase CLI:
+
+```bash
+supabase db push
+```
+
+### 5. Seed Demo Accounts (Optional)
+
+To create demo user accounts for testing:
+
 ```bash
 npm run seed
 ```
 
-### 6. Run the Development Server
+This creates four accounts with password `EduBridge123!`:
+- `student@edubridge.test` (Student)
+- `parent@edubridge.test` (Parent)
+- `teacher@edubridge.test` (Teacher)
+- `admin@edubridge.test` (Administrator)
+
+### 6. Start the Development Server
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
----
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Environment Variables
 
-EduBridge Connect requires the following environment variables defined in `.env.local`:
+The following environment variables are required in `.env.local`:
 
-| Variable | Description | Exposure |
-| :--- | :--- | :--- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL (e.g. `https://xyzcompany.supabase.co`) | Public (Client & Server) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon / public API key | Public (Client & Server) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role secret key (used for administrative seed & server tasks) | **Private (Server-only)** |
-| `NEXT_PUBLIC_APP_URL` | Application root URL for auth redirect URLs (e.g., `http://localhost:3000`) | Public (Client & Server) |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL (e.g., `https://xyzcompany.supabase.co`) | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public API key | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (for admin operations and seeding) | Yes |
+| `NEXT_PUBLIC_APP_URL` | Application root URL for auth redirects (e.g., `http://localhost:3000`) | Yes |
 
-> **Warning:** Never expose or commit `SUPABASE_SERVICE_ROLE_KEY` or real credentials to Git. Always keep them in `.env.local` which is ignored by `.gitignore`.
+> **⚠️ Security Warning**: Never commit `.env.local` or any file containing real credentials to Git. The `.gitignore` file is configured to exclude environment files. The `SUPABASE_SERVICE_ROLE_KEY` should only be used server-side and never exposed to the client.
 
----
+## Database Setup
 
-## Database
+### Schema Overview
 
-EduBridge Connect relies on PostgreSQL hosted by Supabase with Row Level Security (RLS) enabled on all tables:
+The database consists of 29 tables organized into the following domains:
 
-- **Migrations:** Located in `supabase/migrations/`
-  - `20240928000001_init.sql`: Core schema, relations, constraints, triggers, and comprehensive RLS policies.
-  - `20240928000002_qa_fixes.sql`: Security patches and query optimizations.
-- **Full Schema Reference:** `supabase/full_schema.sql` contains the complete cumulative schema definition.
-- **Seeding:** `npm run seed` executes `scripts/seed.ts` via `tsx` to create demo user accounts for testing each role (`student`, `teacher`, `parent`, `admin`).
-- **RLS Verification:** `node scripts/test_rls.js` runs automated policy access checks across multiple roles to guarantee isolation.
+**Core Entities:**
+- `schools` - Institution records
+- `profiles` - User profiles linked to Supabase Auth
+- `students`, `parents`, `teachers` - Role-specific profile extensions
+- `parent_student_relationships` - Parent-child links with approval workflow
 
----
+**Academic Structure:**
+- `classes` - Classroom entities
+- `class_students` - Student enrollment in classes
+- `courses` - Course catalog
+- `lessons` - Individual lessons within courses
+- `lesson_progress` - Student lesson completion tracking
+- `course_favorites` - User bookmarks for courses
 
-## Development
+**Content & Assessment:**
+- `resources` - Learning materials (PDF, video, notes, links)
+- `assignments` - Assignment definitions
+- `assignment_submissions` - Student work submissions
+- `grades` - Grade records
+- `quizzes` - Quiz definitions
+- `quiz_questions` - Quiz questions (multiple choice, true/false, short answer)
+- `quiz_answers` - Correct answer references
+- `quiz_attempts` - Student quiz attempts
+- `quiz_attempt_answers` - Student quiz responses
 
-The following npm scripts are defined in `package.json`:
+**Operations:**
+- `attendance` - Attendance records (present, absent, late, excused)
+- `schedules` - Calendar events (class, live, exam, event)
+- `announcements` - School communications
+- `messages` - Direct messaging
+- `notifications` - User notifications
+- `payments` - Tuition and fee transactions
+- `audit_logs` - System activity tracking
+- `platform_settings` - Global configuration
+
+### Row Level Security (RLS)
+
+All tables have RLS policies enabled that enforce:
+- Users can only read their own data unless granted specific permissions
+- Role-based access control (e.g., teachers can access their class data)
+- Parent-student relationship approval workflow prevents unauthorized access
+
+### Migration Files
+
+- `supabase/migrations/20240928000001_init.sql` - Initial schema with all tables, types, constraints, triggers, and RLS policies
+- `supabase/migrations/20240928000002_qa_fixes.sql` - Security improvements and query optimizations
+- `supabase/migrations/20250106000001_parent_approval.sql` - Parent-student relationship approval system
+- `supabase/full_schema.sql` - Complete cumulative schema reference
+
+### Verification Script
+
+Test RLS policies using the verification script:
+
+```bash
+node scripts/test_rls.js
+```
+
+## Project Structure
+
+```
+EduBridge Connect/
+├── .cursor/                    # Editor workspace configuration
+├── .env.example                # Environment variable template
+├── .gitignore                  # Git ignore rules
+├── .vercel/                    # Vercel deployment configuration
+├── eslint.config.mjs           # ESLint configuration
+├── next.config.ts              # Next.js configuration (image domains)
+├── package.json                # Dependencies and npm scripts
+├── postcss.config.mjs          # PostCSS configuration
+├── scripts/                    # Utility scripts
+│   ├── seed.ts                 # Demo account seeding
+│   └── test_rls.js             # RLS policy verification
+├── src/
+│   ├── actions/                # Next.js Server Actions
+│   │   ├── academic.ts         # Academic operations
+│   │   ├── account.ts          # Account management
+│   │   └── auth.ts             # Authentication (login, signup, password reset)
+│   ├── app/                    # Next.js App Router
+│   │   ├── (app)/              # Protected routes by role
+│   │   │   ├── admin/          # Administrator portal
+│   │   │   ├── parent/         # Parent portal
+│   │   │   ├── student/        # Student portal
+│   │   │   └── teacher/        # Teacher portal
+│   │   ├── auth/callback/      # Supabase auth callback handler
+│   │   ├── login/              # Login page
+│   │   ├── signup/             # Registration page
+│   │   ├── forgot-password/    # Password recovery
+│   │   ├── reset-password/     # Password reset form
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Landing page
+│   │   └── globals.css         # Global styles
+│   ├── components/             # React components
+│   │   ├── charts/             # Recharts visualization components
+│   │   ├── forms/              # Form components
+│   │   ├── layout/             # App shell, navigation, sidebar
+│   │   ├── pages/              # Reusable page components
+│   │   ├── shared/             # Shared UI components
+│   │   ├── student/            # Student-specific components
+│   │   └── ui/                 # Radix UI primitives
+│   ├── lib/                    # Library code
+│   │   ├── auth/               # Authentication helpers (roles, navigation)
+│   │   ├── data/               # Data query abstractions
+│   │   ├── supabase/           # Supabase clients (browser, server, admin, middleware)
+│   │   ├── utils.ts            # Utility functions
+│   │   └── validations/        # Zod schemas
+│   ├── middleware.ts           # Next.js middleware (route protection)
+│   ├── test/                   # Vitest test files
+│   └── types/                  # TypeScript type definitions
+├── supabase/
+│   ├── full_schema.sql         # Complete schema reference
+│   └── migrations/             # SQL migration files
+├── tailwind.config.ts          # Tailwind CSS configuration
+├── tsconfig.json               # TypeScript configuration
+└── vitest.config.ts            # Vitest test configuration
+```
+
+## Available Commands
 
 | Command | Description |
-| :--- | :--- |
-| `npm run dev` | Start the development server with Turbopack (`next dev --turbopack`) |
-| `npm run build` | Build the optimized production application (`next build`) |
-| `npm run start` | Start the production server after building (`next start`) |
-| `npm run lint` | Run ESLint to analyze code quality and enforce standards (`next lint`) |
+|---------|-------------|
+| `npm run dev` | Start development server with Turbopack (`next dev --turbopack`) |
+| `npm run build` | Build production-optimized application (`next build`) |
+| `npm run start` | Start production server (`next start`) |
+| `npm run lint` | Run ESLint code quality checks (`next lint`) |
 | `npm run typecheck` | Run TypeScript compiler without emitting files (`tsc --noEmit`) |
-| `npm run test` | Run the automated test suite once (`vitest run`) |
-| `npm run test:watch` | Run the test suite in interactive watch mode (`vitest`) |
-| `npm run seed` | Seed database with initial demo accounts (`tsx scripts/seed.ts`) |
+| `npm run test` | Run test suite once (`vitest run`) |
+| `npm run test:watch` | Run tests in watch mode (`vitest`) |
+| `npm run seed` | Seed database with demo accounts (`tsx scripts/seed.ts`) |
 
----
+## Authentication & Security
 
-## Security
+### Authentication Flow
 
-Security is foundational to EduBridge Connect:
-- **Zero Secrets in Repository:** All sensitive credentials, service-role keys, and tokens are kept strictly in environment variables and are excluded via `.gitignore`.
-- **Row Level Security (RLS):** Data access is enforced directly at the PostgreSQL layer based on authenticated Supabase JWT identities and roles.
-- **Role Verification:** Route access is protected via Next.js middleware and server-side role validation to prevent privilege escalation.
+1. **Sign Up**: Users register via `/signup` with email, password, full name, and role (student, parent, or teacher)
+2. **Email Confirmation**: Supabase sends confirmation email (if enabled in project settings)
+3. **Login**: Users authenticate via `/login` using Supabase Auth
+4. **Session Management**: Sessions are maintained via HTTP cookies with Supabase SSR integration
+5. **Password Reset**: Users can request password resets via `/forgot-password` and complete via `/reset-password`
 
----
+### Role-Based Access Control
+
+- **Middleware Protection**: `src/middleware.ts` intercepts all requests and validates:
+  - User authentication status
+  - Account status (active/inactive)
+  - Role authorization for protected routes
+- **Route Segmentation**: Each role has dedicated portal routes (`/student`, `/teacher`, `/parent`, `/admin`)
+- **Server-Side Validation**: Server Actions verify roles before database operations
+
+### Data Security
+
+- **Row Level Security (RLS)**: All database tables have RLS policies enforced at the PostgreSQL layer
+- **Service Role Key**: Administrative operations use the service role key, never exposed to the client
+- **Environment Variables**: All sensitive credentials stored in `.env.local` (gitignored)
+- **Input Validation**: All form inputs validated via Zod schemas before processing
+
+### Known Limitations
+
+- Admin accounts cannot be created via public signup; they must be created by an existing admin or via the seed script
+- Parent-student relationships require approval workflow to prevent unauthorized data access
+- The application does not currently implement two-factor authentication (2FA)
+
+## Testing
+
+### Test Suite
+
+The project uses Vitest for unit and integration testing:
+
+- **Auth Validations**: `src/test/auth-validations.test.ts` - Authentication form validation
+- **Role Utilities**: `src/test/roles.test.ts` - Role-based access control logic
+- **Parent Approval**: `src/test/parent-approval.test.ts` - Parent-student relationship workflow
+- **Utilities**: `src/test/utils.test.ts` - General utility functions
+
+### Running Tests
+
+```bash
+# Run all tests once
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+### Test Configuration
+
+Tests are configured in `vitest.config.ts` with:
+- `jsdom` environment for DOM testing
+- Global test functions enabled
+- Path aliases configured (`@/*` maps to `./src/*`)
+
+## Deployment
+
+### Vercel Deployment
+
+The project is configured for Vercel deployment:
+
+1. **Connect Repository**: Link your GitHub repository to Vercel
+2. **Environment Variables**: Add the following in Vercel project settings:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_APP_URL` (set to your production domain)
+3. **Build Configuration**: Vercel automatically detects Next.js and runs `npm run build`
+4. **Database**: Ensure your Supabase project has migrations applied
+5. **Deploy**: Vercel will build and deploy on push to the configured branch
+
+### Production Considerations
+
+- Set `NEXT_PUBLIC_APP_URL` to your production domain
+- Enable email confirmation in Supabase Auth settings
+- Review and customize RLS policies for your security requirements
+- Configure Supabase storage buckets if file uploads are needed
+- Set up monitoring and error tracking (e.g., Vercel Analytics, Sentry)
+
+## Troubleshooting
+
+### Common Issues
+
+**"config" error on login**
+- Ensure all environment variables are set in `.env.local`
+- Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are correct
+
+**Database connection errors**
+- Confirm Supabase project is active
+- Check that migrations have been applied to your database
+- Verify RLS policies are enabled
+
+**Seed script fails**
+- Ensure `SUPABASE_SERVICE_ROLE_KEY` is set and valid
+- Check that the Supabase project has auth enabled
+- Verify the database schema migrations have been applied
+
+**TypeScript errors**
+- Run `npm run typecheck` to identify type issues
+- Ensure all dependencies are installed with `npm install`
+- Check that `tsconfig.json` paths are correctly configured
+
+**Build fails**
+- Run `npm run lint` to check for linting errors
+- Ensure all environment variables are available during build
+- Verify Node.js version is v20 or higher
+
+### Getting Help
+
+If you encounter issues not covered here:
+- Check the [Next.js documentation](https://nextjs.org/docs)
+- Review [Supabase documentation](https://supabase.com/docs)
+- Open an issue on the GitHub repository
+
+## Contributing
+
+Contributions are welcome. To contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes following the existing code style
+4. Run tests and linting (`npm run test` and `npm run lint`)
+5. Commit your changes with a clear message
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a pull request
+
+### Development Guidelines
+
+- Follow TypeScript strict mode conventions
+- Use existing UI components from `src/components/ui/`
+- Add Zod validation for new forms in `src/lib/validations/`
+- Update RLS policies when modifying database access patterns
+- Add tests for new utility functions and validation schemas
 
 ## License
 
