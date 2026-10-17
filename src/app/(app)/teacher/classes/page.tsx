@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getTeacherRecord } from "@/lib/data/records";
-import { createClassAction } from "@/actions/academic";
+import { createClassAction, deleteClassAction } from "@/actions/academic";
 import { PageHeader, EmptyState } from "@/components/shared/states";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ export default async function TeacherClassesPage() {
   const teacher = await getTeacherRecord(profile.id);
   const supabase = await createClient();
   const { data: classes } = teacher
-    ? await supabase.from("classes").select("*, class_students(student_id)").eq("teacher_id", teacher.id)
+    ? await supabase.from("classes").select("*").eq("teacher_id", teacher.id)
     : { data: [] };
 
   return (
@@ -27,14 +27,22 @@ export default async function TeacherClassesPage() {
           ) : (
             classes.map((item) => (
               <article key={item.id} className="rounded-xl border bg-card p-5">
-                <h2 className="font-semibold">{item.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {item.subject} · Grade {item.grade_level} {item.section ? `· ${item.section}` : ""}
-                </p>
-                <p className="mt-2 text-sm">{item.description}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {item.schedule_label} · {(item.class_students as { student_id: string }[] | null)?.length ?? 0} students
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h2 className="font-semibold">{item.name}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {item.subject} · Grade {item.grade_level} {item.section ? `· ${item.section}` : ""}
+                    </p>
+                    <p className="mt-2 text-sm">{item.description}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {item.schedule_label}
+                    </p>
+                  </div>
+                  <ActionForm action={deleteClassAction}>
+                    <input type="hidden" name="classId" value={item.id} />
+                    <PendingButton variant="destructive" size="sm">Delete</PendingButton>
+                  </ActionForm>
+                </div>
               </article>
             ))
           )}

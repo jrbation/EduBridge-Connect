@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/session";
 import { getStudentRecord, notify } from "@/lib/data/records";
@@ -45,7 +46,20 @@ export async function createClassAction(formData: FormData) {
   });
   if (error) return { error: error.message };
   revalidatePath("/teacher/classes");
-  return { success: "Class created" };
+  revalidatePath("/teacher");
+  redirect("/teacher/classes");
+}
+
+export async function deleteClassAction(formData: FormData) {
+  await requireRole("teacher");
+  const classId = str(formData, "classId");
+  const supabase = await createClient();
+  const { error } = await supabase.from("classes").delete().eq("id", classId);
+  if (error) return { error: error.message };
+  revalidatePath("/teacher/classes");
+  revalidatePath("/teacher");
+  revalidatePath("/teacher/students");
+  redirect("/teacher/classes");
 }
 
 export async function enrollStudentAction(formData: FormData) {
@@ -60,10 +74,15 @@ export async function enrollStudentAction(formData: FormData) {
     .maybeSingle();
   if (!student) return { error: "Student not found" };
   const { error } = await supabase.from("class_students").insert({ class_id: classId, student_id: student.id });
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === "23505") {
+      return { error: "Student is already enrolled in this class" };
+    }
+    return { error: error.message };
+  }
   await notify(student.profile_id, "Added to a class", "You were enrolled in a new class.", "class");
   revalidatePath("/teacher/students");
-  return { success: "Student enrolled" };
+  redirect("/teacher/students");
 }
 
 export async function removeStudentAction(formData: FormData) {
