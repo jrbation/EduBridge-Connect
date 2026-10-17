@@ -40,7 +40,7 @@ export default async function TeacherStudentsPage() {
     }
     acc[classId]!.push(enrollment);
     return acc;
-  }, {} as Record<string, typeof enrollments>);
+  }, {} as Record<string, { class_id: string; student_id: string }[]>);
 
   // Create a lookup map for students
   const studentMap = new Map((allStudents ?? []).map((s) => [s.id, s]));
